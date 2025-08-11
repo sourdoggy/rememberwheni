@@ -8,7 +8,7 @@ const supabase = createClient(supabaseUrl, supabaseKey)
 export default async function
   handler(req, res) {
     if (req.method !== 'POST') return
-    res.status(405).json({ error: 'only POST allowed' })
+    res.status(405).json({ error: 'only POST allowed' })}
 
 const { filename, password } = req.body
     if (!filename || !password) return
