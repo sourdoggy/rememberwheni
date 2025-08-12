@@ -3,25 +3,33 @@ import { createClient } from '@supabase/supabase-js'
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY)
 
 export default async function handler(req, res) {
-  if (req.method !== 'GET') {
+  if (req.method !== 'GET')
     return res.status(405).json({ error: 'only GET allowed' })
-  }
 
   const { filename, password } = req.query
-  if (!filename || !password) {
-    return res.status(400).json({ error: 'missing file name or password' })
-  }
+  if (!filename || !password)
+    return res.status(400).json({ error: 'missing filename or password' })
 
-  const { data, error } = await supabase
+  const { data: fileMeta, error: selectError } = await supabase
     .from('documents')
-    .select('*')
+    .select('password')
     .eq('filename', filename)
-    .eq('password', password)
     .single()
 
-  if (error) {
-    return res.status(500).json({ error: error.message })
-  }
+  if (selectError || fileMeta.password !== password)
+    return res.status(403).json({ error: 'wrong filename or password' })
 
-  return res.status(200).json(data)
+  const bucketName = 'documents'
+  const filePath = `files/${filename}.txt`
+  
+  const { data: fileData, error: downloadError } = await supabase.storage
+    .from(bucketName)
+    .download(filepath)
+
+  if (downloadError)
+    return res.status(500).json({ error: downloadError.message })
+
+  const text = await fileData.text()
+
+  res.status(200).json({ filename, content: text })
 }
