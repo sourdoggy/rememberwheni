@@ -7,15 +7,15 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'only PUT allowed' })
   }
 
-  const { name, password, content } = req.body
-  if (!name || !password || !content) {
+  const { filename, password, content } = req.body
+  if (!filename || !password || !content) {
     return res.status(400).json({ error: 'missing file name, password, or content' })
   }
 
   const { data, error } = await supabase
     .from('documents')
     .update({ content })
-    .eq('name', name)
+    .eq('filename', filename)
     .eq('password', password)
     .select()
 
