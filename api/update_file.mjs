@@ -47,8 +47,8 @@ export default async function handler(req, res) {
       .json({ error: 'missing file name, password, or content' })
   }
 
-  const bucketName = 'documents' // replace this with your bucket name
-  const filePath = `documents/${filename}.txt` // or any path you want
+  const bucketName = 'documents'
+  const filePath = `documents/${filename}.txt`
 
   const { error: uploadError } = await supabase.storage
     .from(bucketName)
