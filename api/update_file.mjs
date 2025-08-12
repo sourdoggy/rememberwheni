@@ -24,7 +24,7 @@ export default async function handler(req, res) {
     size += chunk.length
     if (size > MAX_SIZE) {
       res.statusCode = 413
-      res.end(JSON.stringify({ error: 'file too large (max 2mb)' }))
+      res.end(JSON.stringify({ error: 'file too large' }))
       req.destroy()
       return
     }
