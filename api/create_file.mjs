@@ -1,30 +1,66 @@
 import { createClient } from '@supabase/supabase-js'
 
-const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY)
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
+)
 
 export default async function handler(req, res) {
-  if (req.method !== 'POST') 
+  if (req.method !== 'POST') {
     return res.status(405).json({ error: 'only POST allowed' })
+  }
 
   const { filename, password } = req.body
-  if (!filename || !password) 
+  if (!filename || !password) {
     return res.status(400).json({ error: 'missing filename or password' })
+  }
 
-  const { data: existingFile, error: selectError } = await supabase
+  const { data: existingFile } = await supabase
     .from('documents')
     .select('filename')
     .eq('filename', filename)
     .single()
 
-  if (existingFile) 
+  if (existingFile) {
     return res.status(409).json({ error: 'file already exists' })
+  }
 
   const { error: insertError } = await supabase
     .from('documents')
-    .insert({ filename, password, content: 'hello world!', updated_at: new Date() })
+    .insert({ filename, password, content: 'nill', updated_at: new Date() })
 
-  if (insertError) 
+  if (insertError) {
     return res.status(500).json({ error: insertError.message })
+  }
 
-  res.status(200).json({ message: 'new file created!' })
+  const fileContent = 'hello world!'
+  const buffer = Buffer.from(fileContent, 'utf-8')
+  const bucketName = 'documents'
+  const filePath = `files/${filename}`
+
+  const { error: uploadError } = await supabase.storage
+    .from(bucketName)
+    .upload(filePath, buffer, { upsert: false })
+
+  if (uploadError) {
+    await supabase
+      .from('documents')
+      .delete()
+      .eq('filename', filename)
+    return res.status(500).json({ error: uploadError.message })
+  }
+
+  const { error: updateError } = await supabase
+    .from('documents')
+    .update({ content: filePath, updated_at: new Date() })
+    .eq('filename', filename)
+    .eq('password', password)
+
+  if (updateError) {
+    await supabase.storage.from(bucketName).remove([filePath]).catch(() => {})
+    await supabase.from('documents').delete().eq('filename', filename)
+    return res.status(500).json({ error: updateError.message })
+  }
+
+  return res.status(200).json({ message: 'new file created and uploaded', path: filePath })
 }
