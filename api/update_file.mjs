@@ -47,9 +47,18 @@ export default async function handler(req, res) {
       .json({ error: 'missing file name, password, or content' })
   }
 
+  const bucketName = 'documents' // replace this with your bucket name
+  const filePath = `documents/${filename}.txt` // or any path you want
+
+  const { error: uploadError } = await supabase.storage
+    .from(bucketName)
+    .upload(filePath, buffer, { upsert: true })
+
+  if (uploadError) return res.status(500).json({ error: uploadError.message })
+  
   const { data, error } = await supabase
     .from('documents')
-    .update({ content })
+    .update({ content: filePath, updated_at: new Date() })
     .eq('filename', filename)
     .eq('password', password)
     .select()
