@@ -24,7 +24,7 @@ export default async function handler(req, res) {
   
   const { data: fileData, error: downloadError } = await supabase.storage
     .from(bucketName)
-    .download(filepath)
+    .download(filePath)
 
   if (downloadError)
     return res.status(500).json({ error: downloadError.message })
