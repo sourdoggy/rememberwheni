@@ -7,15 +7,15 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'only GET allowed' })
   }
 
-  const { name, password } = req.query
-  if (!name || !password) {
+  const { filename, password } = req.query
+  if (!filename || !password) {
     return res.status(400).json({ error: 'missing file name or password' })
   }
 
   const { data, error } = await supabase
     .from('documents')
     .select('*')
-    .eq('name', name)
+    .eq('filename', filename)
     .eq('password', password)
     .single()
 
