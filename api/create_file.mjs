@@ -36,7 +36,7 @@ export default async function handler(req, res) {
   const fileContent = 'hello world!'
   const buffer = Buffer.from(fileContent, 'utf-8')
   const bucketName = 'documents'
-  const filePath = `files/${filename}`
+  const filePath = `files/${filename}.txt`
 
   const { error: uploadError } = await supabase.storage
     .from(bucketName)
