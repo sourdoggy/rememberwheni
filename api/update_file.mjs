@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
+import pako from 'pako'
 
 export const config = {
   api: {
@@ -37,9 +38,8 @@ export default async function handler(req, res) {
   } catch {
     return res.status(400).json({ error: 'invalid json' })
   }
-
-  // checks
   
+  // checks
   const { filename, password, content } = body
   if (!filename || !password || !content) {
     return res
@@ -47,15 +47,17 @@ export default async function handler(req, res) {
       .json({ error: 'missing file name, password, or content' })
   }
 
+  const deflatedContent = pako.deflate(content, {to:'string'})
+  
   const bucketName = 'documents'
   const filePath = `files/${filename}.txt`
 
-  const buffer = Buffer.from(content, 'utf-8')
+  const buffer = Buffer.from(deflatedContent)
   
   const { error: uploadError } = await supabase.storage
     .from(bucketName)
     .upload(filePath, buffer, { upsert: true })
-
+  
   if (uploadError) return res.status(500).json({ error: uploadError.message })
   
   const { data, error } = await supabase
