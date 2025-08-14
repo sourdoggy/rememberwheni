@@ -34,5 +34,5 @@ export default async function handler(req, res) {
   const uint8Array = new Uint8Array(arrayBuffer)
   const content = pako.inflate(uint8Array, { to: 'string' })
 
-  res.status(200).json({ filename, content })
+  res.status(200).json({ content })
 }
