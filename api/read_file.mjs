@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
+import pako from 'pako'
 
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY)
 
@@ -31,5 +32,5 @@ export default async function handler(req, res) {
 
   const text = await fileData.text()
 
-  res.status(200).json({ filename, content: text })
+  res.status(200).json({ filename, content: pako.inflate(text, to:'string') })
 }
