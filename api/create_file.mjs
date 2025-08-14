@@ -15,6 +15,17 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'missing filename or password' })
   }
 
+  const filenameRegex = /^[a-zA-Z0-9_\-\+\(\)\/!\?:@&#%\*]{3,20}$
+  const passwordRegex = /^[a-zA-Z0-9_\-\+\(\)\/!\?:@&#%\*]{5,20}$
+
+  if (!filenameRegex.test(filename)) {
+    return res.status(400).json({ error: 'invalid filename'})
+  }
+
+    if (!passwordRegex.test(password)) {
+    return res.status(400).json({ error: 'invalid password'})
+  }
+  
   const { data: existingFile } = await supabase
     .from('documents')
     .select('filename')
