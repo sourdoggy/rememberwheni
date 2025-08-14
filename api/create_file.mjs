@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
+import pako from 'pako'
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -44,7 +45,7 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: insertError.message })
   }
 
-  const fileContent = 'hello world!'
+  const fileContent = pako.deflate('hello world!', {to:'string'})
   const buffer = Buffer.from(fileContent, 'utf-8')
   const bucketName = 'documents'
   const filePath = `files/${filename}.txt`
