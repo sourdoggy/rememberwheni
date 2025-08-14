@@ -46,7 +46,7 @@ export default async function handler(req, res) {
   }
 
   const fileContent = pako.deflate('hello world!', {to:'string'})
-  const buffer = Buffer.from(fileContent, 'utf-8')
+  const buffer = Buffer.from(fileContent)
   const bucketName = 'documents'
   const filePath = `files/${filename}.txt`
 
